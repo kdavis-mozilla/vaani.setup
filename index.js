@@ -9,6 +9,7 @@ var platform = require('./platform.js');
 var wifi = require('./wifi.js');
 var wait = require('./wait.js');
 var evernoteConfig = require('./evernoteConfig.json');
+var child_process = require('child_process');
 
 // Our local copy of all the data we get back from the oauth process
 var OAUTH_TOKEN_FILE = 'oauthToken.json'
@@ -30,6 +31,12 @@ var talkOnFirstPage = false;
 // Configure the microphone, if necessary
 if (platform.microphoneDevice) {
   Wakeword.deviceName = platform.microphoneDevice
+}
+
+// Configure the audio levels
+if (process.platform === 'linux') {
+  shelloutSync('amixer',  '-c 2 set PCM 100%');
+  shelloutSync('amixer',  '-c 3 set PCM 100%');
 }
 
 
@@ -120,6 +127,10 @@ function startAP() {
         .then(() => waitForSpeech('okay'))
         .then(() => play('audio/enter-url.wav'))
     });
+}
+
+function shelloutSync(command, params) {
+  child_process.spawnSync(command, params.split(' '));
 }
 
 function startServer(wifiStatus) {
